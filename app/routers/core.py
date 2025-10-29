@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File
-from utils.file_handler import save_pdf
+from app.utils.file_handler import save_pdf
 
 router = APIRouter(prefix="/app", tags=["App"])
 
