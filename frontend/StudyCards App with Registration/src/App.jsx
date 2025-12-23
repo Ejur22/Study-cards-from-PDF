@@ -5,6 +5,7 @@ import RegistrationScreen from './components/RegistrationScreen'
 import QuizScreen from './components/QuizScreen'
 import ResultsScreen from './components/ResultsScreen'
 import { sampleQuestions } from './data/sampleQuestions'
+import LoginScreen from './components/LoginScreen'
 import './App.css'
 
 
@@ -47,7 +48,9 @@ function App() {
         )}
 
         {currentScreen === 'registration' && (
-          <RegistrationScreen onBack={() => setCurrentScreen('main')} />
+          <RegistrationScreen 
+          onBack={() => setCurrentScreen('main')}
+          onGoToLogin={() => setCurrentScreen('login')} />
         )}
 
         {currentScreen === 'quiz' && (
@@ -66,6 +69,13 @@ function App() {
           />
         )}
 
+        {currentScreen === 'login' && (
+          <LoginScreen
+            onBack={() => setCurrentScreen('registration')}
+            onGoToRegister={() => setCurrentScreen('registration')}
+          />
+        )}
+        
       </main>
     </div>
   )

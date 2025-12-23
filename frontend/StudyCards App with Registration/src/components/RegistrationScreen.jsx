@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import './RegistrationScreen.css'
 
-const RegistrationScreen = ({ onBack }) => {
+const RegistrationScreen = ({ onBack, onGoToLogin }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -77,7 +77,7 @@ const RegistrationScreen = ({ onBack }) => {
                 value={formData.password}
                 onChange={handleInputChange}
                 className="form-input"
-                placeholder="Создайте пароль"
+                placeholder="Придумайте пароль"
                 required
               />
             </div>
@@ -102,7 +102,15 @@ const RegistrationScreen = ({ onBack }) => {
           </form>
           
           <div className="login-link">
-            <p>Уже есть аккаунт? <a href="#" className="link">Войти</a></p>
+            <p>Уже есть аккаунт? 
+              <button
+                type="button"
+                className="link-button"
+                onClick={onGoToLogin}
+              >
+                Войти
+              </button>
+            </p>
           </div>
         </div>
       </div>
