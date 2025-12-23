@@ -1,0 +1,37 @@
+.history-page {
+  padding: 20px;
+  min-height: calc(100vh - 65px);
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.history-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+}
+
+.history-content {
+  background-color: #d0d0d0;
+  border-radius: 16px;
+  padding: 20px;
+  min-height: 400px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loading {
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+  padding: 40px;
+}

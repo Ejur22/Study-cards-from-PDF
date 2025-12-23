@@ -1,7 +1,7 @@
 import React from 'react'
 import './Header.css'
 
-const Header = ({ onAvatarClick }) => {
+const Header = ({ onAvatarClick, onHistoryClick }) => {
   return (
     <header className="header">
       <div className="header-content">
@@ -15,7 +15,7 @@ const Header = ({ onAvatarClick }) => {
           <h1 className="logo-text">StudyCards</h1>
         </div>
         <div className="header-right">
-          <span className="history-text">История</span>
+          <button className="history-button" onClick={onHistoryClick}>История</button>
           <button className="avatar-button" onClick={onAvatarClick}>
             <div className="avatar-circle">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

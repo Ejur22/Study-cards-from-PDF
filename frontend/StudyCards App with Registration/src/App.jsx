@@ -6,6 +6,7 @@ import QuizScreen from './components/QuizScreen'
 import ResultsScreen from './components/ResultsScreen'
 import { sampleQuestions } from './data/sampleQuestions'
 import LoginScreen from './components/LoginScreen'
+import HistoryPage from './components/HistoryPage'
 import './App.css'
 
 
@@ -39,7 +40,9 @@ function App() {
 
   return (
     <div className="app">
-      <Header onAvatarClick={handleAvatarClick} />
+      <Header 
+      onAvatarClick={handleAvatarClick}  
+      onHistoryClick={() => setCurrentScreen('history')}/>
 
       <main className="main-content">
 
@@ -76,6 +79,12 @@ function App() {
           />
         )}
         
+        {currentScreen === 'history' && (
+          <HistoryPage 
+            onBack={() => setCurrentScreen('main')} 
+          />
+        )}
+
       </main>
     </div>
   )

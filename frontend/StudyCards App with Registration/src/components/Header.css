@@ -89,3 +89,17 @@
     height: 36px;
   }
 }
+
+.history-button {
+  background: none;
+  border: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  margin-right: 16px;
+}
+
+.history-button:hover {
+  color: #4285f4;
+}
