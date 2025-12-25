@@ -1,26 +1,47 @@
 import React, { useState } from 'react'
 import './RegistrationScreen.css'
+import api from "../api";
+import { useAuth } from "../AuthContext";
+
 
 const LoginScreen = ({ onBack, onGoToRegister }) => {
+  const { login } = useAuth();
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
-  })
+  });
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }))
-  }
+    }));
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Логика входа
-    console.log('Login data:', formData)
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
+    try {
+      const params = new URLSearchParams();
+      params.append("username", formData.email);
+      params.append("password", formData.password);
+
+      const res = await api.post("/auth/login", params, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
+
+      login(res.data.access_token);
+    } catch (err) {
+      alert(
+        err.response?.data?.detail || "Ошибка входа"
+      );
+    }
+  };
+  
   return (
     <div className="registration-screen">
       <div className="registration-wrapper">

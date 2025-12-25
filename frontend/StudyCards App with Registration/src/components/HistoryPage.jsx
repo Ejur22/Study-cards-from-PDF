@@ -2,37 +2,31 @@ import React, { useState, useEffect } from 'react'
 import BackButton from './BackButton'
 import StudyItem from './StudyItem'
 import './HistoryPage.css'
+import api from "../api";
+import { useAuth } from "../AuthContext";
+
+
 
 const HistoryPage = ({ onBack }) => {
   const [historyItems, setHistoryItems] = useState([])
+  const { isAuth } = useAuth();
 
-  // Симуляция загрузки данных из базы данных
   useEffect(() => {
+    if (!isAuth) return;
+    
     const fetchHistoryData = async () => {
-      // Имитация API запроса
-      const mockData = [
-        {
-          id: 1,
-          filename: '123123.pdf',
-          score: 17,
-          totalQuestions: 20
-        },
-        {
-          id: 2,
-          filename: 'trigonometry.pdf',
-          score: 15,
-          totalQuestions: 20
-        }
-      ]
-      
-      // Имитация задержки загрузки
-      setTimeout(() => {
-        setHistoryItems(mockData)
-      }, 500)
+      try {
+        const res = await api.get("/groups/"); // GET "/" на backend
+        // ожидаем формат: [{ id, filename, score, totalQuestions }]
+        setHistoryItems(res.data); 
+      } catch (err) {
+        console.error("Ошибка загрузки истории:", err);
+        setHistoryItems([]);
+      }
     }
 
-    fetchHistoryData()
-  }, [])
+    fetchHistoryData();
+  }, [isAuth]);
 
   const handleRepeatTest = (itemId) => {
     console.log(`Повторить тест для элемента с ID: ${itemId}`)

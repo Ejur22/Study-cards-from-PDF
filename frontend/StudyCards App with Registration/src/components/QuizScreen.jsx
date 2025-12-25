@@ -5,34 +5,45 @@ const QuizScreen = ({ questions, onComplete, onBack }) => {
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [showFeedback, setShowFeedback] = useState(false)
   const [userAnswers, setUserAnswers] = useState([])
-
   const currentQuestion = questions[currentQuestionIndex]
   const isLastQuestion = currentQuestionIndex === questions.length - 1
 
+  // ----------------------------
+  // Выбор ответа
+  // ----------------------------
   const handleAnswerSelect = (optionIndex) => {
     if (showFeedback) return
     setSelectedAnswer(optionIndex)
   }
 
+  // ----------------------------
+  // Подтверждение ответа
+  // ----------------------------
   const handleSubmitAnswer = () => {
     if (selectedAnswer === null) return
 
     const isCorrect = selectedAnswer === currentQuestion.correctAnswer
-    const newAnswer = {
-      questionIndex: currentQuestionIndex,
-      selectedAnswer,
-      isCorrect,
-      question: currentQuestion.question
-    }
 
-    setUserAnswers([...userAnswers, newAnswer])
+    setUserAnswers(prev => [
+      ...prev,
+      {
+        questionIndex: currentQuestionIndex,
+        question: currentQuestion.question,
+        selectedAnswer,
+        correctAnswer: currentQuestion.correctAnswer,
+        isCorrect
+      }
+    ])
+
     setShowFeedback(true)
   }
 
+  // ----------------------------
+  // Переход дальше / завершение
+  // ----------------------------
   const handleNextQuestion = () => {
     if (isLastQuestion) {
-      const correctAnswers = userAnswers.filter(answer => answer.isCorrect).length + 
-                           (selectedAnswer === currentQuestion.correctAnswer ? 1 : 0)
+      const correctAnswers = userAnswers.filter(a => a.isCorrect).length
       const totalQuestions = questions.length
       const accuracy = Math.round((correctAnswers / totalQuestions) * 100)
 
@@ -41,41 +52,43 @@ const QuizScreen = ({ questions, onComplete, onBack }) => {
         incorrectAnswers: totalQuestions - correctAnswers,
         totalQuestions,
         accuracy,
-        answers: [...userAnswers, {
-          questionIndex: currentQuestionIndex,
-          selectedAnswer,
-          isCorrect: selectedAnswer === currentQuestion.correctAnswer,
-          question: currentQuestion.question
-        }]
+        answers: userAnswers
       })
     } else {
-      setCurrentQuestionIndex(currentQuestionIndex + 1)
+      setCurrentQuestionIndex(prev => prev + 1)
       setSelectedAnswer(null)
       setShowFeedback(false)
     }
   }
 
+  // ----------------------------
+  // CSS классы вариантов
+  // ----------------------------
   const getOptionClassName = (optionIndex) => {
     let className = 'option-button'
-    
+
     if (selectedAnswer === optionIndex) {
       className += ' selected'
     }
-    
+
     if (showFeedback) {
       className += ' disabled'
+
       if (optionIndex === currentQuestion.correctAnswer) {
         className += ' correct'
-      } else if (selectedAnswer === optionIndex && optionIndex !== currentQuestion.correctAnswer) {
+      } else if (selectedAnswer === optionIndex) {
         className += ' incorrect'
       }
     }
-    
+
     return className
   }
 
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100
 
+  // ----------------------------
+  // UI
+  // ----------------------------
   return (
     <div className="quiz-screen">
       <header className="quiz-header">
@@ -83,16 +96,18 @@ const QuizScreen = ({ questions, onComplete, onBack }) => {
           Вопрос {currentQuestionIndex + 1} из {questions.length}
         </div>
         <div className="progress-bar">
-          <div 
-            className="progress-fill" 
+          <div
+            className="progress-fill"
             style={{ width: `${progress}%` }}
-          ></div>
+          />
         </div>
       </header>
 
       <div className="question-card">
-        <h2 className="question-title">{currentQuestion.question}</h2>
-        
+        <h2 className="question-title">
+          {currentQuestion.question}
+        </h2>
+
         <ul className="options-list">
           {currentQuestion.options.map((option, index) => (
             <li key={index} className="option-item">
@@ -101,7 +116,7 @@ const QuizScreen = ({ questions, onComplete, onBack }) => {
                 onClick={() => handleAnswerSelect(index)}
                 disabled={showFeedback}
               >
-                <div className="option-radio"></div>
+                <div className="option-radio" />
                 <span>{option}</span>
               </button>
             </li>
@@ -109,22 +124,33 @@ const QuizScreen = ({ questions, onComplete, onBack }) => {
         </ul>
 
         {showFeedback && (
-          <div className={`feedback ${selectedAnswer === currentQuestion.correctAnswer ? 'correct' : 'incorrect'}`}>
-            {selectedAnswer === currentQuestion.correctAnswer 
-              ? 'Правильно! Отличная работа.' 
-              : `Неправильно. Правильный ответ: ${currentQuestion.options[currentQuestion.correctAnswer]}`
+          <div
+            className={`feedback ${
+              selectedAnswer === currentQuestion.correctAnswer
+                ? 'correct'
+                : 'incorrect'
+            }`}
+          >
+            {selectedAnswer === currentQuestion.correctAnswer
+              ? 'Правильно! Отличная работа.'
+              : `Неправильно. Правильный ответ: ${
+                  currentQuestion.options[currentQuestion.correctAnswer]
+                }`
             }
           </div>
         )}
       </div>
 
       <nav className="quiz-navigation">
-        <button className="nav-button back-button" onClick={onBack}>
+        <button
+          className="nav-button back-button"
+          onClick={onBack}
+        >
           ← Назад
         </button>
-        
+
         {!showFeedback ? (
-          <button 
+          <button
             className="nav-button next-button"
             onClick={handleSubmitAnswer}
             disabled={selectedAnswer === null}
@@ -132,7 +158,7 @@ const QuizScreen = ({ questions, onComplete, onBack }) => {
             Ответить
           </button>
         ) : (
-          <button 
+          <button
             className="nav-button next-button"
             onClick={handleNextQuestion}
           >
@@ -145,3 +171,156 @@ const QuizScreen = ({ questions, onComplete, onBack }) => {
 }
 
 export default QuizScreen
+
+
+
+
+
+
+// import React, { useState } from 'react'
+
+// const QuizScreen = ({ questions, onComplete, onBack }) => {
+//   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+//   const [selectedAnswer, setSelectedAnswer] = useState(null)
+//   const [showFeedback, setShowFeedback] = useState(false)
+//   const [userAnswers, setUserAnswers] = useState([])
+
+//   const currentQuestion = questions[currentQuestionIndex]
+//   const isLastQuestion = currentQuestionIndex === questions.length - 1
+
+//   const handleAnswerSelect = (optionIndex) => {
+//     if (showFeedback) return
+//     setSelectedAnswer(optionIndex)
+//   }
+
+//   const handleSubmitAnswer = () => {
+//     if (selectedAnswer === null) return
+
+//     const isCorrect = selectedAnswer === currentQuestion.correct_index
+//     const newAnswer = {
+//       questionIndex: currentQuestionIndex,
+//       selectedAnswer,
+//       isCorrect,
+//       question: currentQuestion.question
+//     }
+
+//     setUserAnswers([...userAnswers, newAnswer])
+//     setShowFeedback(true)
+//   }
+
+//   const handleNextQuestion = () => {
+//     if (isLastQuestion) {
+//       const correctAnswers = userAnswers.filter(answer => answer.isCorrect).length + 
+//                            (selectedAnswer === currentQuestion.correctAnswer ? 1 : 0)
+//       const totalQuestions = questions.length
+//       const accuracy = Math.round((correctAnswers / totalQuestions) * 100)
+
+//       onComplete({
+//         correctAnswers,
+//         incorrectAnswers: totalQuestions - correctAnswers,
+//         totalQuestions,
+//         accuracy,
+//         answers: [...userAnswers, {
+//           questionIndex: currentQuestionIndex,
+//           selectedAnswer,
+//           isCorrect: selectedAnswer === currentQuestion.correctAnswer,
+//           question: currentQuestion.question
+//         }]
+//       })
+//     } else {
+//       setCurrentQuestionIndex(currentQuestionIndex + 1)
+//       setSelectedAnswer(null)
+//       setShowFeedback(false)
+//     }
+//   }
+
+//   const getOptionClassName = (optionIndex) => {
+//     let className = 'option-button'
+    
+//     if (selectedAnswer === optionIndex) {
+//       className += ' selected'
+//     }
+    
+//     if (showFeedback) {
+//       className += ' disabled'
+//       if (optionIndex === currentQuestion.correctAnswer) {
+//         className += ' correct'
+//       } else if (selectedAnswer === optionIndex && optionIndex !== currentQuestion.correctAnswer) {
+//         className += ' incorrect'
+//       }
+//     }
+    
+//     return className
+//   }
+
+//   const progress = ((currentQuestionIndex + 1) / questions.length) * 100
+
+//   return (
+//     <div className="quiz-screen">
+//       <header className="quiz-header">
+//         <div className="question-counter">
+//           Вопрос {currentQuestionIndex + 1} из {questions.length}
+//         </div>
+//         <div className="progress-bar">
+//           <div 
+//             className="progress-fill" 
+//             style={{ width: `${progress}%` }}
+//           ></div>
+//         </div>
+//       </header>
+
+//       <div className="question-card">
+//         <h2 className="question-title">{currentQuestion.question}</h2>
+        
+//         <ul className="options-list">
+//           {currentQuestion.options.map((option, index) => (
+//             <li key={index} className="option-item">
+//               <button
+//                 className={getOptionClassName(index)}
+//                 onClick={() => handleAnswerSelect(index)}
+//                 disabled={showFeedback}
+//               >
+//                 <div className="option-radio"></div>
+//                 <span>{option}</span>
+//               </button>
+//             </li>
+//           ))}
+//         </ul>
+
+//         {showFeedback && (
+//           <div className={`feedback ${selectedAnswer === currentQuestion.correctAnswer ? 'correct' : 'incorrect'}`}>
+//             {selectedAnswer === currentQuestion.correctAnswer 
+//               ? 'Правильно! Отличная работа.' 
+//               : `Неправильно. Правильный ответ: ${currentQuestion.options[currentQuestion.correctAnswer]}`
+//             }
+//           </div>
+//         )}
+//       </div>
+
+//       <nav className="quiz-navigation">
+//         <button className="nav-button back-button" onClick={onBack}>
+//           ← Назад
+//         </button>
+        
+//         {!showFeedback ? (
+//           <button 
+//             className="nav-button next-button"
+//             onClick={handleSubmitAnswer}
+//             disabled={selectedAnswer === null}
+//           >
+//             Ответить
+//           </button>
+//         ) : (
+//           <button 
+//             className="nav-button next-button"
+//             onClick={handleNextQuestion}
+//           >
+//             {isLastQuestion ? 'Завершить тест' : 'Следующий вопрос'} →
+//           </button>
+//         )}
+//       </nav>
+//     </div>
+//   )
+// }
+
+// export default QuizScreen

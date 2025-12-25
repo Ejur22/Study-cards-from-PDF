@@ -1,27 +1,50 @@
 import React, { useState } from 'react'
 import './RegistrationScreen.css'
+import api from "../api";
+import { useNavigate } from "react-router-dom";
+
 
 const RegistrationScreen = ({ onBack, onGoToLogin }) => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: ''
-  })
+  });
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }))
-  }
+    }));
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle registration logic here
-    console.log('Registration data:', formData)
-  }
+  // РЕГИСТРАЦИЯ
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      alert("Пароли не совпадают");
+      return;
+    }
+
+    try {
+      await api.post("/auth/register", {
+        full_name: formData.name,   // 👈 адаптация под backend
+        email: formData.email,
+        password: formData.password
+      });
+
+      navigate("/login");
+    } catch (err) {
+      alert(
+        err.response?.data?.detail || "Ошибка регистрации"
+      );
+    }
+  };
 
   return (
     <div className="registration-screen">
