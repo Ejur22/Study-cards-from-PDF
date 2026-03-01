@@ -29,11 +29,35 @@ async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
         email=user.email,
         password=hash_password(user.password),
         full_name=user.full_name,
+        role=user.role or "user",
     )
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
     return new_user
+
+
+# Endpoint для смены роли пользователя (только для admin)
+from app.core.security import require_roles
+from app.models.user import User as UserModel
+from app.schemas.user import UserResponse
+from sqlalchemy.future import select
+
+@router.patch("/users/{user_id}/role", response_model=UserResponse)
+async def change_user_role(
+    user_id: str,
+    new_role: str,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(require_roles(["admin"]))
+):
+    result = await db.execute(select(UserModel).where(UserModel.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.role = new_role
+    await db.commit()
+    await db.refresh(user)
+    return user
 
 
 @router.post("/login", response_model=Token)

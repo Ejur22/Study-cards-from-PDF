@@ -58,6 +58,8 @@ async def create_flashcard(
     return card
 
 
+from app.core.security import require_roles
+
 @router.delete("/{card_id}")
 async def delete_flashcard(
     card_id: str,
@@ -67,8 +69,11 @@ async def delete_flashcard(
     q = select(Flashcard).where(Flashcard.id == card_id)
     res = await db.execute(q)
     card = res.scalars().first()
-    if not card or card.user_id != current_user.id:
+    if not card:
         raise HTTPException(status_code=404, detail="Card not found")
+    # admin может удалять любые, user — только свои
+    if current_user.role != "admin" and card.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
     await db.execute(delete(Flashcard).where(Flashcard.id == card_id))
     await db.commit()
     return {"detail": "Card deleted"}

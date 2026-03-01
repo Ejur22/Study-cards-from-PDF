@@ -35,3 +35,84 @@
   font-size: 16px;
   padding: 40px;
 }
+
+.history-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+/* КНОПКА СОРТИРОВКИ */
+.sort-button {
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151; /* серо-чёрный */
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb; /* светлая рамка */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort-button:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.sort-button:active {
+  background-color: #eef2ff;
+  border-color: #6366f1;
+  color: #4338ca;
+}
+
+/* КОНТЕЙНЕР ПАГИНАЦИИ */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* КНОПКИ */
+.pagination-button {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover */
+.pagination-button:hover:not(:disabled) {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+/* Active */
+.pagination-button:active:not(:disabled) {
+  background-color: #eef2ff;
+  border-color: #6366f1;
+  color: #4338ca;
+}
+
+/* Disabled */
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ТЕКСТ */
+.pagination-info {
+  font-size: 14px;
+  color: #6b7280;
+  user-select: none;
+}
+

@@ -8,7 +8,7 @@ import LoginScreen from './components/LoginScreen'
 import HistoryPage from './components/HistoryPage'
 import './App.css'
 import api from './api'
-import { useAuth } from './AuthContext'
+import { useAuth } from './AuthContext.tsx'
 
 function App() {
   const { isAuth } = useAuth()

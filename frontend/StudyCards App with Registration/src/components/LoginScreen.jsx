@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import './RegistrationScreen.css'
 import api from "../api";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../AuthContext.tsx";
 
 
 const LoginScreen = ({ onBack, onGoToRegister }) => {

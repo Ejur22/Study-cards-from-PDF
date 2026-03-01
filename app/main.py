@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import engine, Base
 from app.routers import auth, flashcards, groups
+from app.routers import users
 
 app = FastAPI(title="SmartCards Backend")
 
@@ -25,6 +26,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(groups.router, prefix="/groups", tags=["groups"])
 app.include_router(flashcards.router, prefix="/flashcards", tags=["flashcards"])
+app.include_router(users.router, tags=["users"])
 
 
 # Создаём все таблицы при старте
@@ -36,3 +38,6 @@ async def startup():
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+
+
+#PS C:\Fullstack_project\Study-cards-from-PDF> uvicorn app.main:app --reload

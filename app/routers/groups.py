@@ -65,6 +65,8 @@ async def upload_file(
     }
 
 
+from app.core.security import require_roles
+
 @router.delete("/{group_id}")
 async def delete_group(
     group_id: str,
@@ -74,8 +76,11 @@ async def delete_group(
     q = select(Group).where(Group.id == group_id)
     res = await db.execute(q)
     group = res.scalars().first()
-    if not group or group.user_id != current_user.id:
+    if not group:
         raise HTTPException(status_code=404, detail="Group not found")
+    # admin может удалять любые, user — только свои
+    if current_user.role != "admin" and group.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
     await db.execute(delete(Flashcard).where(Flashcard.group_id == group_id))
     await db.execute(delete(Group).where(Group.id == group_id))
     await db.commit()

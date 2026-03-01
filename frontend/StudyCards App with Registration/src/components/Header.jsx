@@ -1,7 +1,10 @@
 import React from 'react'
 import './Header.css'
+import { useAuth } from '../AuthContext.tsx'
 
 const Header = ({ onAvatarClick, onHistoryClick }) => {
+  const { isAuth, logout } = useAuth()
+
   return (
     <header className="header">
       <div className="header-content">
@@ -14,8 +17,23 @@ const Header = ({ onAvatarClick, onHistoryClick }) => {
           </div>
           <h1 className="logo-text">StudyCards</h1>
         </div>
+
         <div className="header-right">
-          <button className="history-button" onClick={onHistoryClick}>История</button>
+          {/* История — ВСЕГДА */}
+          <button className="history-button" onClick={onHistoryClick}>
+            История
+          </button>
+
+          {/* Выйти — только если авторизован */}
+          {isAuth && (
+            <button
+              className="history-button"
+              onClick={logout}
+            >
+              Выйти
+            </button>
+          )}
+
           <button className="avatar-button" onClick={onAvatarClick}>
             <div className="avatar-circle">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

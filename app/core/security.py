@@ -1,3 +1,17 @@
+
+# RBAC dependency
+from fastapi import status
+from typing import List
+
+def require_roles(roles: List[str]):
+    async def role_checker(current_user: User = Depends(get_current_user)):
+        if current_user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Insufficient permissions: required roles {roles}"
+            )
+        return current_user
+    return role_checker
 from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, HTTPException

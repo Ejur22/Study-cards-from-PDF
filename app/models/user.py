@@ -12,6 +12,7 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
     full_name = Column(String, nullable=True)
+    role = Column(String, nullable=False, default="user")  # 'guest', 'user', 'admin'
     created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
 
     groups = relationship("Group", back_populates="user", cascade="all, delete-orphan")
