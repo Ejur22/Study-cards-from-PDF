@@ -2,8 +2,11 @@ import React from 'react'
 import './Header.css'
 import { useAuth } from '../AuthContext.tsx'
 
-const Header = ({ onAvatarClick, onHistoryClick }) => {
-  const { isAuth, logout } = useAuth()
+const Header = ({ onAvatarClick, onHistoryClick, onUsersClick }) => {
+  const { isAuth, logout, role } = useAuth()
+
+  const canSeeHistory = role === "user" || role === "admin"
+  const canSeeUsers = role === "admin"
 
   return (
     <header className="header">
@@ -19,10 +22,19 @@ const Header = ({ onAvatarClick, onHistoryClick }) => {
         </div>
 
         <div className="header-right">
-          {/* История — ВСЕГДА */}
-          <button className="history-button" onClick={onHistoryClick}>
-            История
-          </button>
+          {/* История — только для user/admin */}
+          {canSeeHistory && (
+            <button className="history-button" onClick={onHistoryClick}>
+              История
+            </button>
+          )}
+
+          {/* Пользователи — только для admin */}
+          {canSeeUsers && (
+            <button className="history-button" onClick={onUsersClick}>
+              Пользователи
+            </button>
+          )}
 
           {/* Выйти — только если авторизован */}
           {isAuth && (

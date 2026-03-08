@@ -6,6 +6,7 @@ import QuizScreen from './components/QuizScreen'
 import ResultsScreen from './components/ResultsScreen'
 import LoginScreen from './components/LoginScreen'
 import HistoryPage from './components/HistoryPage'
+import UsersPage from './components/UsersPage'
 import './App.css'
 import api from './api'
 import { useAuth } from './AuthContext.tsx'
@@ -89,6 +90,7 @@ function App() {
         onHistoryClick={() =>
           setCurrentScreen(isAuth ? 'history' : 'login')
         }
+        onUsersClick={() => setCurrentScreen('users')}
       />
 
       <main className="main-content">
@@ -100,10 +102,6 @@ function App() {
         )}
 
         {!loading && currentScreen === 'main' && (
-          <MainScreen onFileUpload={handleFileUploaded} />
-        )}
-        
-        {currentScreen === 'main' && (
           <MainScreen onFileUpload={handleFileUploaded} />
         )}
 
@@ -138,6 +136,12 @@ function App() {
 
         {currentScreen === 'history' && (
           <HistoryPage
+            onBack={() => setCurrentScreen('main')}
+          />
+        )}
+
+        {currentScreen === 'users' && (
+          <UsersPage
             onBack={() => setCurrentScreen('main')}
           />
         )}
