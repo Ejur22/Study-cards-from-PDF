@@ -1,6 +1,6 @@
 import React from 'react'
 import './Header.css'
-import { useAuth } from '../AuthContext.tsx'
+import { useAuth } from '../AuthContext'
 
 const Header = ({ onAvatarClick, onHistoryClick, onUsersClick }) => {
   const { isAuth, logout, role } = useAuth()

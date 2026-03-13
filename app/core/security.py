@@ -1,21 +1,9 @@
 
-# RBAC dependency
-from fastapi import status
+from datetime import datetime, timedelta, timezone
 from typing import List
 
-def require_roles(roles: List[str]):
-    async def role_checker(current_user: User = Depends(get_current_user)):
-        if current_user.role not in roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Insufficient permissions: required roles {roles}"
-            )
-        return current_user
-    return role_checker
-from datetime import datetime, timedelta, timezone
-
-from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,7 +14,7 @@ from app.core.database import get_db
 from app.models.user import User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+security = HTTPBearer()
 
 
 def hash_password(password: str) -> str:
@@ -37,36 +25,47 @@ def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-
-
 async def get_user_by_email(email: str, db: AsyncSession):
     result = await db.execute(select(User).where(User.email == email))
     return result.scalars().first()
 
 
-async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
-):
+async def get_current_user(request: Request, db: AsyncSession = Depends(get_db)):
     credentials_exception = HTTPException(
-        status_code=401,
+        status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid token",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    token = request.cookies.get("access_token")
+    if not token:
+        raise credentials_exception
+
     try:
-        payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
-        email = payload.get("sub")
-        if email is None:
-            raise credentials_exception
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
     except JWTError:
         raise credentials_exception
+
+    if payload.get("type") != "access":
+        raise credentials_exception
+
+    email = payload.get("sub")
+    if email is None:
+        raise credentials_exception
+
     user = await get_user_by_email(email, db)
     if user is None:
         raise credentials_exception
+
     return user
+
+
+# RBAC dependency
+def require_roles(roles: List[str]):
+    async def role_checker(current_user: User = Depends(get_current_user)):
+        if current_user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Insufficient permissions: required roles {roles}"
+            )
+        return current_user
+    return role_checker

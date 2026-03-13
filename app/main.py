@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import engine, Base
 from app.routers import auth, flashcards, groups
 from app.routers import users
+from app.models import user, group, flashcard, refresh_token  # Import all models
 
 app = FastAPI(title="SmartCards Backend")
 

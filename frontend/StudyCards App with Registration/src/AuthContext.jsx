@@ -1,27 +1,67 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import api from "./api";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-const [token, setToken] = useState(() => localStorage.getItem("token"));
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-const login = (newToken) => {
-localStorage.setItem("token", newToken);
-setToken(newToken); // триггерит rerender
-};
+  const checkAuth = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get("/auth/me");
+      setUser(res.data);
+    } catch (err) {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const logout = () => {
-localStorage.removeItem("token");
-setToken(null);
-};
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
-const isAuth = !!token;
+  const login = async (email, password) => {
+    const params = new URLSearchParams();
+    params.append("username", email);
+    params.append("password", password);
 
-return (
-<AuthContext.Provider value={{ token, login, logout, isAuth }}>
-{children}
-</AuthContext.Provider>
-);
+    const res = await api.post("/auth/login", params, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+
+    await checkAuth();
+    return res;
+  };
+
+  const logout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      setUser(null);
+    }
+  };
+
+  const isAuth = !!user;
+  const role = user?.role || "guest";
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout, isAuth, role, loading, checkAuth }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};

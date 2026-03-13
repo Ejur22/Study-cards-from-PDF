@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import './RegistrationScreen.css'
 import api from "../api";
-import { useAuth } from "../AuthContext.tsx";
+import { useAuth } from "../AuthContext";
 
 
 const LoginScreen = ({ onBack, onGoToRegister }) => {
@@ -24,17 +24,8 @@ const LoginScreen = ({ onBack, onGoToRegister }) => {
     e.preventDefault();
 
     try {
-      const params = new URLSearchParams();
-      params.append("username", formData.email);
-      params.append("password", formData.password);
-
-      const res = await api.post("/auth/login", params, {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      });
-
-      login(res.data.access_token);
+      await login(formData.email, formData.password);
+      // После успешного логина AuthContext обновится автоматически
     } catch (err) {
       alert(
         err.response?.data?.detail || "Ошибка входа"

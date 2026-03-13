@@ -3,7 +3,7 @@ import BackButton from './BackButton'
 import StudyItem from './StudyItem'
 import './HistoryPage.css'
 import api from "../api"
-import { useAuth } from "../AuthContext.tsx"
+import { useAuth } from "../AuthContext"
 
 const ITEMS_PER_PAGE = 5
 

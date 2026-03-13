@@ -9,10 +9,10 @@ import HistoryPage from './components/HistoryPage'
 import UsersPage from './components/UsersPage'
 import './App.css'
 import api from './api'
-import { useAuth } from './AuthContext.tsx'
+import { useAuth } from './AuthContext'
 
 function App() {
-  const { isAuth } = useAuth()
+  const { isAuth, loading: authLoading } = useAuth()
   const [currentScreen, setCurrentScreen] = useState('main')
   const [questions, setQuestions] = useState(null)
   const [quizResults, setQuizResults] = useState(null)
