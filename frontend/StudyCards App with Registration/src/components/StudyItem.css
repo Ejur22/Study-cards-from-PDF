@@ -21,10 +21,20 @@
   flex: 1;
 }
 
-.filename {
+.filename-button {
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: #007bff;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  text-align: left;
+}
+
+.filename-button:hover {
+  color: #0056b3;
 }
 
 .study-item-actions {
@@ -36,13 +46,25 @@
 .score {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+}
+
+.score-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.score-percentage {
+  font-size: 16px;
+  font-weight: 700;
+  color: #22c55e;
 }
 
 .score-text {
-  font-size: 14px;
-  font-weight: 600;
-  color: #22c55e;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
 }
 
 .repeat-button {
@@ -75,12 +97,12 @@
     align-items: flex-start;
     gap: 12px;
   }
-  
+
   .study-item-actions {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .repeat-button {
     font-size: 13px;
     padding: 8px 12px;

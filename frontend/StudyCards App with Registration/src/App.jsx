@@ -63,9 +63,22 @@ function App() {
   // ----------------------------
   // Завершение теста
   // ----------------------------
-  const handleQuizComplete = (results) => {
+  const handleQuizComplete = async (results) => {
     setQuizResults(results)
     setCurrentScreen('results')
+
+    // Save score to database
+    if (currentGroupId) {
+      try {
+        await api.put(`/groups/${currentGroupId}/score`, {
+          score: results.accuracy,
+          correct: results.correctAnswers,
+          total: results.totalQuestions
+        })
+      } catch (err) {
+        console.error('Failed to save score:', err)
+      }
+    }
   }
 
   // ----------------------------
