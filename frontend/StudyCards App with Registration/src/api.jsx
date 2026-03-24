@@ -63,10 +63,15 @@ api.interceptors.response.use(
 // Helper function to download file
 export const downloadFile = async (groupId, filename) => {
   try {
-    const response = await api.get(`/groups/${groupId}/download`, {
-      responseType: 'blob',
-    });
-    const url = window.URL.createObjectURL(new Blob([response.data]));
+    // First get the presigned URL
+    const response = await api.get(`/groups/${groupId}/download`);
+    const { download_url } = response.data;
+
+    // Then download the file from the presigned URL
+    const fileResponse = await fetch(download_url);
+    const blob = await fileResponse.blob();
+
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', filename);

@@ -1,52 +1,12 @@
 from datetime import datetime, timezone
-from typing import List
-
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse
-from sqlalchemy import delete, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.core.database import get_db
-from app.core.security import get_current_user
-from app.core.utils import generate_uuid
-from app.models.flashcard import Flashcard
-from app.models.group import Group
-from app.schemas.group import FileUploadResponse, GroupResponse
-from app.services.file_storage import FileStorageService
-from app.services.llm import generate_flashcards
-from app.services.pdf import extract_text_from_pdf
-
-router = APIRouter()
-
-
-from datetime import datetime, timezone
 from typing import List, Optional
+import json
+import io
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
-from fastapi.responses import FileResponse
-from sqlalchemy import and_, desc, func, or_, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.core.database import get_db
-from app.core.security import get_current_user
-from app.core.utils import generate_uuid
-from app.models.flashcard import Flashcard
-from app.models.group import Group
-from app.schemas.group import FileUploadResponse, GroupFilters, GroupResponse, PaginatedGroupsResponse
-from app.services.file_storage import FileStorageService
-from app.services.llm import generate_flashcards
-from app.services.pdf import extract_text_from_pdf
-
-router = APIRouter()
-
-
-from datetime import datetime, timezone
-from typing import List, Optional
-
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from sqlalchemy import and_, desc, func, or_, select
+from sqlalchemy import and_, desc, func, or_, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -55,7 +15,7 @@ from app.core.utils import generate_uuid
 from app.models.flashcard import Flashcard
 from app.models.group import Group
 from app.schemas.group import FileUploadResponse, GroupFilters, GroupResponse, PaginatedGroupsResponse
-from app.services.file_storage import FileStorageService
+from app.services.file_storage import file_storage
 from app.services.llm import generate_flashcards
 from app.services.pdf import extract_text_from_pdf
 
@@ -167,7 +127,7 @@ async def upload_file(
     db: AsyncSession = Depends(get_db),
 ):
     # Validate file
-    if not FileStorageService.validate_file(file):
+    if not file_storage.validate_file(file):
         raise HTTPException(status_code=400, detail="Invalid file type or size")
 
     group_id = generate_uuid()
@@ -176,7 +136,7 @@ async def upload_file(
     # Reset file pointer for saving
     await file.seek(0)
     # Save file
-    file_path = FileStorageService.save_file(file, f"{group_id}_{file.filename}")
+    file_path = file_storage.save_file(file, f"{group_id}_{file.filename}")
 
     new_group = Group(
         id=group_id,
@@ -225,7 +185,7 @@ async def delete_group(
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     # Delete associated file
     if group.file_path:
-        FileStorageService.delete_file(group.file_path)
+        file_storage.delete_file(group.file_path)
     await db.execute(delete(Flashcard).where(Flashcard.group_id == group_id))
     await db.execute(delete(Group).where(Group.id == group_id))
     await db.commit()
@@ -247,11 +207,11 @@ async def download_file(
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     if not group.file_path:
         raise HTTPException(status_code=404, detail="File not found")
-    file_path = FileStorageService.get_file_path(group.file_path)
-    if not file_path:
+    
+    # Get presigned URL for download
+    file_url = file_storage.get_file_url(group.file_path)
+    if not file_url:
         raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(
-        path=file_path,
-        filename=group.filename,
-        media_type="application/pdf"
-    )
+    
+    # Return the presigned URL as JSON
+    return {"download_url": file_url, "filename": group.filename}

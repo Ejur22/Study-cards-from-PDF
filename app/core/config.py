@@ -12,5 +12,12 @@ class Settings:
         "DATABASE_URL", "postgresql+asyncpg://postgres:postgres@db:5432/smartcards"
     )
 
+    # MinIO settings
+    MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "localhost:9000")
+    MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
+    MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
+    MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME", "pdf-files")
+    MINIO_SECURE = os.getenv("MINIO_SECURE", "False").lower() == "true"
+
 
 settings = Settings()

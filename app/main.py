@@ -42,3 +42,11 @@ if __name__ == "__main__":
 
 
 #PS C:\Fullstack_project\Study-cards-from-PDF> uvicorn app.main:app --reload
+
+# source venv/bin/activate
+
+# wget https://dl.min.io/server/minio/release/linux-amd64/minio
+# chmod +x minio
+# ./minio server /data --console-address ":9001"
+
+# ./minio.exe server minio\data --console-address ":9001"  windows
