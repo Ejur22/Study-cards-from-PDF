@@ -1,0 +1,231 @@
+/* Dictionary Widget Styles */
+
+.dictionary-widget {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 20px 0;
+  color: #1f2937;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  animation: slideInUp 0.5s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.dictionary-widget.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.dictionary-widget.error {
+  background: white;
+  border-color: #ffcdd2;
+}
+
+.dict-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+  color: #667eea;
+}
+
+.dict-content {
+  position: relative;
+  z-index: 1;
+}
+
+.dict-word {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  word-break: break-word;
+  color: #1f2937;
+}
+
+.dict-pos {
+  display: inline-block;
+  background: #f0f4ff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  font-weight: 500;
+  color: #667eea;
+}
+
+.dict-definition {
+  margin: 16px 0;
+}
+
+.dict-definition h4,
+.dict-example h4 {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #9ca3af;
+}
+
+.dict-definition p,
+.dict-example p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #4b5563;
+}
+
+.dict-example {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.example-text {
+  font-style: italic;
+  color: #6b7280;
+}
+
+
+
+/* Скелетон для загрузки */
+.dict-skeleton {
+  width: 100%;
+  padding: 16px;
+}
+
+.skeleton-word {
+  height: 32px;
+  background: linear-gradient(
+    90deg,
+    #e5e7eb,
+    #f3f4f6,
+    #e5e7eb
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  width: 60%;
+}
+
+.skeleton-text {
+  height: 16px;
+  background: linear-gradient(
+    90deg,
+    #e5e7eb,
+    #f3f4f6,
+    #e5e7eb
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.skeleton-text.short {
+  width: 50%;
+}
+
+/* Ошибка контент */
+.error-content {
+  text-align: center;
+}
+
+.error-content h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  color: #d32f2f;
+}
+
+.error-content p {
+  margin: 0 0 16px 0;
+  color: #4b5563;
+}
+
+.retry-btn {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.retry-btn:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.retry-btn:active {
+  transform: translateY(0);
+}
+
+/* Анимация загрузки */
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Анимация появления */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Отзывчивый дизайн */
+@media (max-width: 768px) {
+  .dictionary-widget {
+    padding: 16px;
+    margin: 16px 0;
+  }
+
+  .dict-word {
+    font-size: 24px;
+  }
+
+  .dict-title {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dictionary-widget {
+    padding: 12px;
+    margin: 12px 0;
+  }
+
+  .dict-word {
+    font-size: 20px;
+  }
+
+  .dict-definition p,
+  .dict-example p {
+    font-size: 14px;
+  }
+}
+
+/* Улучшение доступности */
+.dictionary-widget:focus-within {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const QuizScreen = ({ questions, onComplete, onBack }) => {
+const QuizScreen = ({ questions, onComplete }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [showFeedback, setShowFeedback] = useState(false)
@@ -142,13 +142,6 @@ const QuizScreen = ({ questions, onComplete, onBack }) => {
       </div>
 
       <nav className="quiz-navigation">
-        <button
-          className="nav-button back-button"
-          onClick={onBack}
-        >
-          ← Назад
-        </button>
-
         {!showFeedback ? (
           <button
             className="nav-button next-button"

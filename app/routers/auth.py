@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.security import (
     get_current_user,
+    get_user_by_email,
     hash_password,
     require_roles,
     verify_password,

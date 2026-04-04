@@ -5,12 +5,13 @@ import { useAuth } from "../AuthContext";
 
 
 const LoginScreen = ({ onBack, onGoToRegister }) => {
-  const { login } = useAuth();
+  const { login } = useAuth()
 
   const [formData, setFormData] = useState({
     email: '',
     password: ''
-  });
+  })
+  const [loading, setLoading] = useState(false)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -21,17 +22,20 @@ const LoginScreen = ({ onBack, onGoToRegister }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
+    setLoading(true)
 
     try {
-      await login(formData.email, formData.password);
+      await login(formData.email, formData.password)
       // После успешного логина AuthContext обновится автоматически
     } catch (err) {
       alert(
         err.response?.data?.detail || "Ошибка входа"
-      );
+      )
+    } finally {
+      setLoading(false)
     }
-  };
+  }
   
   return (
     <div className="registration-screen">
@@ -84,8 +88,12 @@ const LoginScreen = ({ onBack, onGoToRegister }) => {
               />
             </div>
 
-            <button type="submit" className="submit-button">
-              Войти
+            <button 
+              type="submit" 
+              className="submit-button"
+              disabled={loading}
+            >
+              {loading ? 'Загрузка...' : 'Войти'}
             </button>
           </form>
 

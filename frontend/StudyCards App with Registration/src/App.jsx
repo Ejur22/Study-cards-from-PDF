@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Header from './components/Header'
 import MainScreen from './components/MainScreen'
 import RegistrationScreen from './components/RegistrationScreen'
@@ -7,6 +7,7 @@ import ResultsScreen from './components/ResultsScreen'
 import LoginScreen from './components/LoginScreen'
 import HistoryPage from './components/HistoryPage'
 import UsersPage from './components/UsersPage'
+import SEOHead from './components/SEOHead'
 import './App.css'
 import api from './api'
 import { useAuth } from './AuthContext'
@@ -18,6 +19,16 @@ function App() {
   const [quizResults, setQuizResults] = useState(null)
   const [currentGroupId, setCurrentGroupId] = useState(null)
   const [loading, setLoading] = useState(false)
+
+  // ----------------------------
+  // Навигация при изменении статуса аутентификации
+  // ----------------------------
+  useEffect(() => {
+    // Если пользователь залогинился, переводим на главную
+    if (isAuth && (currentScreen === 'login' || currentScreen === 'registration')) {
+      setCurrentScreen('main')
+    }
+  }, [isAuth, currentScreen])
 
   // ----------------------------
   // Загрузка PDF → генерация теста
@@ -56,7 +67,7 @@ function App() {
       console.error(err)
       alert('Ошибка при обработке PDF')
     } finally {
-    setLoading(false) // ⬅️ КОНЕЦ загрузки (всегда)
+      setLoading(false) // ⬅️ КОНЕЦ загрузки (всегда)
     }
   }
 
@@ -92,10 +103,67 @@ function App() {
   }
 
   // ----------------------------
+  // SEO заголовки в зависимости от страницы
+  // ----------------------------
+  const getSEOHead = () => {
+    switch (currentScreen) {
+      case 'main':
+        return (
+          <SEOHead
+            title="StudyCards - Создавайте тесты из PDF"
+            description="Автоматически создавайте интерактивные карточки и тесты из PDF файлов. Эффективное обучение с визуализацией и отслеживанием результатов."
+            canonical="https://studycards.app/"
+            keywords="pdf тесты, интерактивные карточки, обучение, создание тестов, студенты"
+          />
+        )
+      case 'quiz':
+        return (
+          <SEOHead
+            title="Тест - StudyCards"
+            description="Проходите интерактивный тест для проверки ваших знаний"
+            robots="noindex, follow"
+          />
+        )
+      case 'results':
+        return (
+          <SEOHead
+            title="Результаты - StudyCards"
+            description="Ваши результаты тестирования"
+            robots="noindex, follow"
+          />
+        )
+      case 'history':
+        return (
+          <SEOHead
+            title="История - StudyCards"
+            description="Ваша история обучения"
+            robots="noindex, follow"
+          />
+        )
+      case 'login':
+      case 'registration':
+        return (
+          <SEOHead
+            title="Вход - StudyCards"
+            description="Войдите или зарегистрируйтесь в StudyCards"
+            robots="noindex, follow"
+          />
+        )
+      default:
+        return (
+          <SEOHead />
+        )
+    }
+  }
+
+  // ----------------------------
   // UI
   // ----------------------------
   return (
     <div className="app">
+      {/* SEO управление заголовками */}
+      {getSEOHead()}
+
       <Header
         onAvatarClick={() =>
           setCurrentScreen(isAuth ? 'main' : 'registration')

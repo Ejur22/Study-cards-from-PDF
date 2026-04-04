@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import './MainScreen.css'
+import DictionaryWidget from './DictionaryWidget'
 
 const MainScreen = ({ onFileUpload }) => {
   const [isDragOver, setIsDragOver] = useState(false)
@@ -33,20 +34,24 @@ const MainScreen = ({ onFileUpload }) => {
 
 
   return (
-    <div className="main-screen">
-      <div className="content-wrapper">
+    <main className="main-screen">
+      {/* Основной контент */}
+      <article className="content-wrapper">
         <h1 className="main-title">Загрузите PDF для создания карточек</h1>
         <p className="main-subtitle">
           Мы автоматически создадим интерактивные карточки на основе вашего материала
         </p>
         
-        <div 
+        {/* Семантическая разметка для области загрузки */}
+        <section 
           className={`upload-area ${isDragOver ? 'drag-over' : ''}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
+          aria-label="Область для загрузки PDF файла"
+          role="region"
         >
-          <div className="upload-icon">
+          <div className="upload-icon" aria-hidden="true">
             <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
               <circle cx="24" cy="24" r="24" fill="#e5e7eb"/>
               <path d="M24 16L24 32M16 24L32 24" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round"/>
@@ -62,15 +67,22 @@ const MainScreen = ({ onFileUpload }) => {
             onChange={handleFileSelect}
             className="file-input"
             id="file-upload"
+            aria-label="Выбрать PDF файл для обработки"
           />
           <label htmlFor="file-upload" className="upload-button">
             Выбрать файл
           </label>
-        </div>
+        </section>
         
-        <p className="file-info">Поддерживается только PDF (макс. 10 МБ)</p>
-      </div>
-    </div>
+        {/* Информация о поддерживаемых форматах */}
+        <aside className="file-info" role="complementary">
+          <strong>Требования:</strong> Поддерживается только PDF (макс. 10 МБ)
+        </aside>
+      </article>
+
+      {/* Dictionary Widget - публичный контент без аутентификации */}
+      <DictionaryWidget />
+    </main>
   )
 }
 

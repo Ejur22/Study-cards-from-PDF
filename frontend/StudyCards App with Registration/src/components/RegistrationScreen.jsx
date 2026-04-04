@@ -1,11 +1,9 @@
 import React, { useState } from 'react'
 import './RegistrationScreen.css'
 import api from "../api";
-import { useNavigate } from "react-router-dom";
 
 
 const RegistrationScreen = ({ onBack, onGoToLogin }) => {
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -38,7 +36,7 @@ const RegistrationScreen = ({ onBack, onGoToLogin }) => {
         password: formData.password
       });
 
-      navigate("/login");
+      onGoToLogin();
     } catch (err) {
       alert(
         err.response?.data?.detail || "Ошибка регистрации"

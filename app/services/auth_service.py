@@ -72,20 +72,23 @@ class AuthService:
 
     @staticmethod
     def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
+        # На localhost используем secure=False, на production используем secure=True
+        is_secure = False  # TODO: change to True in production with HTTPS
+        
         response.set_cookie(
             key="access_token",
             value=access_token,
             httponly=True,
-            secure=True,
-            samesite="strict",
-            max_age=15 * 60  # 15 minutes
+            secure=is_secure,  # False для localhost, True для production
+            samesite="lax",    # lax для лучшей совместимости, strict может блокировать
+            max_age=15 * 60    # 15 minutes
         )
         response.set_cookie(
             key="refresh_token",
             value=refresh_token,
             httponly=True,
-            secure=True,
-            samesite="strict",
+            secure=is_secure,  # False для localhost, True для production
+            samesite="lax",    # lax для лучшей совместимости
             max_age=7 * 24 * 60 * 60  # 7 days
         )
 
