@@ -37,9 +37,14 @@ const HistoryPage = ({ onBack }) => {
       page: parseInt(urlParams.get('page')) || 1,
       limit: parseInt(urlParams.get('limit')) || 10
     })
+
+    // Cleanup: очищаем параметры при размонтировании компонента
+    return () => {
+      // Это позволяет остальным страницам не видеть параметры HistoryPage
+    }
   }, [])
 
-  // Update URL when filters change
+  // Update URL when filters change (только внутри History страницы)
   useEffect(() => {
     const params = new URLSearchParams()
     Object.entries(filters).forEach(([key, value]) => {

@@ -9,13 +9,13 @@ import os
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 
-# Простое решение: использумем public API для случайных слов
-# Можно заменить на любой другой русский словарь API
-
-DICTS_API_BASE = "https://dict.yandex.ru"  # Яндекс словарь
+# Яндекс.Словари API
+YANDEX_DICT_API_URL = "https://dictionary.yandex.net/api/v1/dicservice.json/lookup"
+YANDEX_API_KEY = os.getenv("YANDEX_API_KEY")
 TIMEOUT = 5  # секунд
 
 
@@ -85,6 +85,7 @@ FALLBACK_WORDS = [
 async def fetch_word_data() -> Optional[Dict[str, Any]]:
     """
     Получить данные о слове дня.
+    Сначала выбирает случайное слово, потом получает его определение через API.
     
     Returns:
         Dict с полями: word, definition, example, part_of_speech
@@ -96,16 +97,19 @@ async def fetch_word_data() -> Optional[Dict[str, Any]]:
             logger.info("Using cached word data")
             return cached
         
-        # Пытаемся получить данные с публичного API
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            # Используем простое решение: выбираем случайное слово из списка
-            import random
-            word_data = random.choice(FALLBACK_WORDS)
-            
-            # Кэшируем результат
-            _word_cache.set(word_data)
-            logger.info(f"Fetched word data: {word_data['word']}")
-            return word_data
+        # Выбираем случайное слово
+        word = random.choice(FALLBACK_WORDS)["word"]
+        
+        # Получаем определение через API
+        result = await _fetch_from_yandex_api(word)
+        if result:
+            _word_cache.set(result)
+            logger.info(f"Fetched word data from API: {result['word']}")
+            return result
+        
+        # Если API не сработал, используем fallback
+        logger.warning("API failed, using fallback word")
+        return _get_fallback_word()
             
     except asyncio.TimeoutError:
         logger.warning("Dictionary API timeout, using fallback")
@@ -113,6 +117,73 @@ async def fetch_word_data() -> Optional[Dict[str, Any]]:
     except Exception as e:
         logger.error(f"Error fetching word data: {e}")
         return _get_fallback_word()
+
+
+async def _fetch_from_yandex_api(word: str) -> Optional[Dict[str, Any]]:
+    """
+    Получить определение слова из Яндекс.Словаря.
+    
+    Args:
+        word: слово для поиска
+    
+    Returns:
+        Dict с форматом: {word, definition, example, part_of_speech} или None
+    """
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            params = {
+                "key": YANDEX_API_KEY,
+                "text": word,
+                "lang": "ru-en"  # русско-английский словарь
+            }
+            
+            response = await client.get(YANDEX_DICT_API_URL, params=params)
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            # Парсим ответ от API
+            if not data.get("def"):
+                logger.warning(f"No definitions found for word: {word}")
+                return None
+            
+            # Берём первое определение
+            definition_data = data["def"][0]
+            word_text = definition_data.get("text", word)
+            
+            # Получаем часть речи
+            part_of_speech = ""
+            if definition_data.get("pos"):
+                part_of_speech = definition_data.get("pos", "")
+            
+            # Получаем определение и пример
+            definition = ""
+            example = ""
+            
+            if definition_data.get("tr"):  # tr - переводы/определения
+                translation_data = definition_data["tr"][0]
+                definition = translation_data.get("text", "")
+                
+                # Пытаемся получить пример
+                if translation_data.get("ex"):
+                    example_data = translation_data["ex"][0]
+                    example = example_data.get("text", "")
+            
+            result = {
+                "word": word_text,
+                "definition": definition or "Определение не найдено",
+                "example": example or f"Пример использования слова '{word_text}'",
+                "part_of_speech": part_of_speech or "существительное"
+            }
+            
+            return result
+            
+    except httpx.HTTPError as e:
+        logger.error(f"HTTP error fetching from Yandex API: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"Error parsing Yandex API response: {e}")
+        return None
 
 
 def _get_fallback_word() -> Dict[str, Any]:
@@ -125,7 +196,7 @@ def _get_fallback_word() -> Dict[str, Any]:
 
 async def get_word_definition(word: str) -> Optional[Dict[str, Any]]:
     """
-    Получить определение конкретного слова.
+    Получить определение конкретного слова через API или из fallback.
     
     Args:
         word: слово для поиска
@@ -134,12 +205,22 @@ async def get_word_definition(word: str) -> Optional[Dict[str, Any]]:
         Dict с определением или None
     """
     try:
-        # Это демонстрационная версия с местными данными
+        if not word or len(word) < 2:
+            return None
+        
+        # Сначала пытаемся через API
+        result = await _fetch_from_yandex_api(word)
+        if result:
+            return result
+        
+        # Если API не сработал, проверяем fallback список
         word_lower = word.lower()
         for w in FALLBACK_WORDS:
             if w["word"].lower() == word_lower:
                 return w
+        
         return None
+        
     except Exception as e:
         logger.error(f"Error getting definition for {word}: {e}")
         return None

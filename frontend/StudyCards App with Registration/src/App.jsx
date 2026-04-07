@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 import Header from './components/Header'
 import MainScreen from './components/MainScreen'
 import RegistrationScreen from './components/RegistrationScreen'
@@ -14,7 +15,7 @@ import { useAuth } from './AuthContext'
 
 function App() {
   const { isAuth, loading: authLoading } = useAuth()
-  const [currentScreen, setCurrentScreen] = useState('main')
+  const navigate = useNavigate()
   const [questions, setQuestions] = useState(null)
   const [quizResults, setQuizResults] = useState(null)
   const [currentGroupId, setCurrentGroupId] = useState(null)
@@ -24,30 +25,29 @@ function App() {
   // Навигация при изменении статуса аутентификации
   // ----------------------------
   useEffect(() => {
-    // Если пользователь залогинился, переводим на главную
-    if (isAuth && (currentScreen === 'login' || currentScreen === 'registration')) {
-      setCurrentScreen('main')
+    // Если пользователь залогинился и был на login/registration, переводим на главную
+    if (isAuth && (window.location.pathname === '/login' || window.location.pathname === '/registration')) {
+      navigate('/')
     }
-  }, [isAuth, currentScreen])
+  }, [isAuth, navigate])
 
   // ----------------------------
   // Загрузка PDF → генерация теста
   // ----------------------------
   const handleFileUploaded = async (file) => {
     if (!isAuth) {
-      setCurrentScreen('login')
+      navigate('/login')
       return
     }
 
     try {
-      setLoading(true) // ⬅️ СТАРТ загрузки
+      setLoading(true)
 
       const formData = new FormData()
       formData.append('file', file)
 
       // 1️⃣ создаём группу и flashcards
       const uploadRes = await api.post('/groups/upload', formData)
-
       const groupId = uploadRes.data.group_id
       setCurrentGroupId(groupId)
 
@@ -62,12 +62,12 @@ function App() {
       }))
 
       setQuestions(formattedQuestions)
-      setCurrentScreen('quiz')
+      navigate(`/quiz/${groupId}`)
     } catch (err) {
       console.error(err)
       alert('Ошибка при обработке PDF')
     } finally {
-      setLoading(false) // ⬅️ КОНЕЦ загрузки (всегда)
+      setLoading(false)
     }
   }
 
@@ -76,7 +76,6 @@ function App() {
   // ----------------------------
   const handleQuizComplete = async (results) => {
     setQuizResults(results)
-    setCurrentScreen('results')
 
     // Save score to database
     if (currentGroupId) {
@@ -90,6 +89,8 @@ function App() {
         console.error('Failed to save score:', err)
       }
     }
+    
+    navigate('/results')
   }
 
   // ----------------------------
@@ -99,65 +100,63 @@ function App() {
     setQuestions(null)
     setQuizResults(null)
     setCurrentGroupId(null)
-    setCurrentScreen('main')
+    navigate('/')
   }
 
   // ----------------------------
-  // SEO заголовки в зависимости от страницы
+  // SEO заголовки в зависимости от пути
   // ----------------------------
   const getSEOHead = () => {
-    switch (currentScreen) {
-      case 'main':
-        return (
-          <SEOHead
-            title="StudyCards - Создавайте тесты из PDF"
-            description="Автоматически создавайте интерактивные карточки и тесты из PDF файлов. Эффективное обучение с визуализацией и отслеживанием результатов."
-            canonical="https://studycards.app/"
-            keywords="pdf тесты, интерактивные карточки, обучение, создание тестов, студенты"
-          />
-        )
-      case 'quiz':
-        return (
-          <SEOHead
-            title="Тест - StudyCards"
-            description="Проходите интерактивный тест для проверки ваших знаний"
-            robots="noindex, follow"
-          />
-        )
-      case 'results':
-        return (
-          <SEOHead
-            title="Результаты - StudyCards"
-            description="Ваши результаты тестирования"
-            robots="noindex, follow"
-          />
-        )
-      case 'history':
-        return (
-          <SEOHead
-            title="История - StudyCards"
-            description="Ваша история обучения"
-            robots="noindex, follow"
-          />
-        )
-      case 'login':
-      case 'registration':
-        return (
-          <SEOHead
-            title="Вход - StudyCards"
-            description="Войдите или зарегистрируйтесь в StudyCards"
-            robots="noindex, follow"
-          />
-        )
-      default:
-        return (
-          <SEOHead />
-        )
+    const pathname = window.location.pathname
+    
+    if (pathname === '/') {
+      return (
+        <SEOHead
+          title="StudyCards - Создавайте тесты из PDF"
+          description="Автоматически создавайте интерактивные карточки и тесты из PDF файлов. Эффективное обучение с визуализацией и отслеживанием результатов."
+          canonical="https://studycards.app/"
+          keywords="pdf тесты, интерактивные карточки, обучение, создание тестов, студенты"
+        />
+      )
+    } else if (pathname.startsWith('/quiz')) {
+      return (
+        <SEOHead
+          title="Тест - StudyCards"
+          description="Проходите интерактивный тест для проверки ваших знаний"
+          robots="noindex, follow"
+        />
+      )
+    } else if (pathname === '/results') {
+      return (
+        <SEOHead
+          title="Результаты - StudyCards"
+          description="Ваши результаты тестирования"
+          robots="noindex, follow"
+        />
+      )
+    } else if (pathname === '/history') {
+      return (
+        <SEOHead
+          title="История - StudyCards"
+          description="Ваша история обучения"
+          robots="noindex, follow"
+        />
+      )
+    } else if (pathname === '/login' || pathname === '/registration') {
+      return (
+        <SEOHead
+          title="Вход - StudyCards"
+          description="Войдите или зарегистрируйтесь в StudyCards"
+          robots="noindex, follow"
+        />
+      )
+    } else {
+      return <SEOHead />
     }
   }
 
   // ----------------------------
-  // UI
+  // UI с React Router
   // ----------------------------
   return (
     <div className="app">
@@ -165,13 +164,9 @@ function App() {
       {getSEOHead()}
 
       <Header
-        onAvatarClick={() =>
-          setCurrentScreen(isAuth ? 'main' : 'registration')
-        }
-        onHistoryClick={() =>
-          setCurrentScreen(isAuth ? 'history' : 'login')
-        }
-        onUsersClick={() => setCurrentScreen('users')}
+        onAvatarClick={() => navigate(isAuth ? '/' : '/registration')}
+        onHistoryClick={() => navigate(isAuth ? '/history' : '/login')}
+        onUsersClick={() => navigate('/users')}
       />
 
       <main className="main-content">
@@ -182,49 +177,90 @@ function App() {
           </div>
         )}
 
-        {!loading && currentScreen === 'main' && (
-          <MainScreen onFileUpload={handleFileUploaded} />
-        )}
+        {!loading && (
+          <Routes>
+            {/* Главная страница */}
+            <Route path="/" element={<MainScreen onFileUpload={handleFileUploaded} />} />
 
-        {currentScreen === 'registration' && (
-          <RegistrationScreen
-            onBack={() => setCurrentScreen('main')}
-            onGoToLogin={() => setCurrentScreen('login')}
-          />
-        )}
+            {/* Аутентификация */}
+            <Route 
+              path="/registration" 
+              element={
+                <RegistrationScreen
+                  onBack={() => navigate('/')}
+                  onGoToLogin={() => navigate('/login')}
+                />
+              } 
+            />
+            <Route 
+              path="/login" 
+              element={
+                <LoginScreen
+                  onBack={() => navigate('/')}
+                  onGoToRegister={() => navigate('/registration')}
+                />
+              } 
+            />
 
-        {currentScreen === 'login' && (
-          <LoginScreen
-            onBack={() => setCurrentScreen('main')}
-            onGoToRegister={() => setCurrentScreen('registration')}
-          />
-        )}
+            {/* Тестирование */}
+            <Route 
+              path="/quiz/:groupId" 
+              element={
+                questions ? (
+                  <QuizScreen
+                    questions={questions}
+                    onComplete={handleQuizComplete}
+                    onBack={() => navigate('/')}
+                  />
+                ) : (
+                  <MainScreen onFileUpload={handleFileUploaded} />
+                )
+              } 
+            />
+            <Route 
+              path="/results" 
+              element={
+                quizResults ? (
+                  <ResultsScreen
+                    results={quizResults}
+                    onRestart={handleRestart}
+                  />
+                ) : (
+                  <MainScreen onFileUpload={handleFileUploaded} />
+                )
+              } 
+            />
 
-        {currentScreen === 'quiz' && questions && (
-          <QuizScreen
-            questions={questions}
-            onComplete={handleQuizComplete}
-            onBack={() => setCurrentScreen('main')}
-          />
-        )}
+            {/* История обучения */}
+            <Route 
+              path="/history" 
+              element={
+                <HistoryPage onBack={() => navigate('/')} />
+              } 
+            />
 
-        {currentScreen === 'results' && quizResults && (
-          <ResultsScreen
-            results={quizResults}
-            onRestart={handleRestart}
-          />
-        )}
+            {/* Админка */}
+            <Route 
+              path="/users" 
+              element={
+                <UsersPage onBack={() => navigate('/')} />
+              } 
+            />
 
-        {currentScreen === 'history' && (
-          <HistoryPage
-            onBack={() => setCurrentScreen('main')}
-          />
-        )}
-
-        {currentScreen === 'users' && (
-          <UsersPage
-            onBack={() => setCurrentScreen('main')}
-          />
+            {/* 404 - не найдено */}
+            <Route 
+              path="*" 
+              element={
+                <div style={{textAlign: 'center', padding: '40px'}}>
+                  <h1>404 - Страница не найдена</h1>
+                  <p>Запрошенная страница не существует</p>
+                  <button onClick={() => navigate('/')} style={{padding: '10px 20px', marginTop: '20px'}}>
+                    Вернуться на главную
+                  </button>
+                </div>
+              } 
+            />
+          </Routes>
         )}
       </main>
     </div>
