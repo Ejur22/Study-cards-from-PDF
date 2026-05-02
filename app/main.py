@@ -96,3 +96,6 @@ if __name__ == "__main__":
 # npm install
 
 # ./minio.exe server minio\data --console-address ":9001"  windows
+
+
+# python -m pytest tests/unit/test_auth_service.py -v
