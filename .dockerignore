@@ -3,4 +3,17 @@ __pycache__
 *.pyc
 .git
 .gitignore
+.env
+.env.*
+*.sqlite3
+*.sqlite
+*.db
+*.log
+logs/
+uploads/
+minio/data/
+node_modules/
+frontend/StudyCards App with Registration/node_modules/
+frontend/StudyCards App with Registration/dist/
+.DS_Store
 

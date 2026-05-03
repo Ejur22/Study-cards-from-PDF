@@ -17,7 +17,7 @@ const DictionaryWidget = () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get('/api/dictionary/word-of-day', {
+      const response = await api.get('/dictionary/word-of-day', {
         timeout: 5000  // Таймаут 5 секунд
       })
       
