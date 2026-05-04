@@ -61,12 +61,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install frontend dependencies
         run: |
           cd "frontend/StudyCards App with Registration"
+          rm -rf node_modules package-lock.json
           npm install
+          ls -la node_modules/.bin/vite
           chmod +x node_modules/.bin/*
 
       - name: Build frontend
