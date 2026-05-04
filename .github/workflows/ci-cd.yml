@@ -29,7 +29,6 @@ jobs:
 
       - name: Run Python lint and tests
         run: |
-          # ruff check app tests
           pytest -q
 
       - name: Set up Node
