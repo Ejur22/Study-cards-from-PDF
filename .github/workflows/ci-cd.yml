@@ -67,6 +67,7 @@ jobs:
         run: |
           cd "frontend/StudyCards App with Registration"
           npm install
+          chmod +x node_modules/.bin/*
 
       - name: Build frontend
         run: |
