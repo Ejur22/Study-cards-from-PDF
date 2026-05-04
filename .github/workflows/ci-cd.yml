@@ -21,14 +21,10 @@ jobs:
         ports:
           - 9000:9000
         options: >-
-          --name=minio
           --health-cmd "curl -f http://localhost:9000/minio/health/live"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        volumes:
-          - minio_data:/data
-        command: server /data
 
     steps:
       - uses: actions/checkout@v4
@@ -45,6 +41,17 @@ jobs:
           pip install ruff
 
       - name: Run Python lint and tests
+        env:
+          DATABASE_URL: sqlite+aiosqlite:///./test.db
+          SECRET_KEY: testkey
+          ALGORITHM: HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES: 600
+          YANDEX_API_KEY: ${{ secrets.YANDEX_API_KEY }}
+          MINIO_ENDPOINT: localhost:9000
+          MINIO_ACCESS_KEY: minioadmin
+          MINIO_SECRET_KEY: minioadmin
+          MINIO_BUCKET_NAME: pdf-files
+          MINIO_SECURE: False
         run: |
           python -m pytest tests/unit/test_auth_service.py -v
 
