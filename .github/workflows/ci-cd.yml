@@ -12,6 +12,23 @@ jobs:
   build-test:
     name: Build, test, and package
     runs-on: ubuntu-latest
+    services:
+      minio:
+        image: minio/minio:latest
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        ports:
+          - 9000:9000
+        options: >-
+          --name=minio
+          --health-cmd "curl -f http://localhost:9000/minio/health/live"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        volumes:
+          - minio_data:/data
+      command: server /data
 
     steps:
       - uses: actions/checkout@v4
@@ -21,12 +38,6 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Minio
-        run: |
-          wget -O minio_binary https://dl.min.io/server/minio/release/linux-amd64/minio
-          chmod +x minio_binary
-          ./minio_binary server minio/data --console-address ":9001"
-        
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
