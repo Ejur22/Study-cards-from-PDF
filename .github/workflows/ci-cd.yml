@@ -21,6 +21,12 @@ jobs:
         with:
           python-version: 3.11
 
+      - name: Minio
+        run: |
+          wget -O minio_binary https://dl.min.io/server/minio/release/linux-amd64/minio
+          chmod +x minio_binary
+          ./minio_binary server minio/data --console-address ":9001"
+        
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
