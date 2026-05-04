@@ -28,7 +28,7 @@ jobs:
           --health-retries 5
         volumes:
           - minio_data:/data
-      command: server /data
+        command: server /data
 
     steps:
       - uses: actions/checkout@v4
